@@ -18,19 +18,6 @@
         .symptom-checkbox:focus + label {
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
         }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #8b5cf6;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 2s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -45,14 +32,14 @@
         <main class="bg-white rounded-lg shadow-lg p-6 md:p-8">
             <!-- Direct Disease Lookup Section -->
             <div id="direct-lookup" class="mb-8 pb-8 border-b border-gray-200">
-                <h2 class="text-2xl font-semibold mb-2 text-gray-800">Direct Disease Lookup & AI Analysis</h2>
-                <p class="text-gray-600 mb-4">Select a disease to see its details from the guide and get supplemental information from Gemini AI.</p>
+                <h2 class="text-2xl font-semibold mb-2 text-gray-800">Direct Disease Lookup</h2>
+                <p class="text-gray-600 mb-4">Select a disease directly from the list to see its details.</p>
                 <div class="flex flex-col sm:flex-row gap-3 items-center">
                     <select id="disease-dropdown" class="w-full sm:flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white">
                         <!-- Options will be populated by JS -->
                     </select>
                     <button id="show-disease-btn" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300 transition-all duration-300 ease-in-out w-full sm:w-auto flex-shrink-0">
-                        Get Info & AI Analysis
+                        Get Info
                     </button>
                 </div>
             </div>
@@ -389,6 +376,13 @@
             },
             // Metabolic & Deficiency Diseases
             {
+                name: "Ketosis (Acetonemia)", category: "Metabolic & Deficiency Diseases",
+                symptoms: ["Reduced milk yield", "Loss of appetite", "Weight loss", "Depression", "Sweet/acetone smell on breath", "Nervous signs (licking, chewing)", "Hard, dry feces", "Staggering/Wobbling", "Incoordination"],
+                treatment: "Emergency treatment requires intravenous infusion of Dextrose. <strong>Generic:</strong> 50% Dextrose solution. <strong>Dose:</strong> 500 ml IV, given slowly by a veterinarian. Follow up with oral drenching of a glucose precursor. <strong>Generic:</strong> Propylene Glycol. <strong>Dose:</strong> 250 ml orally twice daily for the first day, then once daily for 2-4 days.",
+                supportive_treatment: "Administer injectable B-Complex vitamins to stimulate appetite. <strong>Example Brands:</strong> B-Plex Vet. In cases of nervous ketosis, a veterinarian may administer corticosteroids like Dexamethasone. Provide highly palatable, energy-dense feed (e.g., molasses, good quality silage).",
+                prevention: "Careful nutritional management during the transition period (3 weeks before and after calving). Avoid cows becoming overly fat at calving. Ensure a high-energy diet in early lactation to prevent a negative energy balance. Use of propylene glycol drench as a preventive in high-risk cows."
+            },
+            {
                 name: "Bloat (Ruminal Tympany)", category: "Metabolic & Deficiency Diseases",
                 symptoms: ["Distended left abdomen", "Difficulty breathing", "Discomfort/Pain", "Grunting", "Loss of appetite", "Sudden death", "Restlessness", "Kicking at belly"],
                 treatment: "For frothy bloat, administer an anti-bloat agent. <strong>Example Brands:</strong> Bloat Stop (ACI), Bloatosil (Techno Drugs). For gas bloat, a vet can pass a stomach tube.",
@@ -545,7 +539,8 @@
             const systemPrompt = `Provide a detailed, up-to-date overview for a veterinarian in Bangladesh on the management of "${diseaseName}". Structure the response with these exact headings: 1. **Nuances in Clinical Signs:** 2. **Advanced or Alternative Treatment Options:** 3. **Detailed Supportive Care Protocols:** (Include management of potential complications from the disease or primary treatments). 4. **Prognosis:**`;
             
              try {
-                const apiKey = "";
+                // IMPORTANT: If you are running this on your own website, you must get a Gemini API key and replace the empty string below.
+                const apiKey = ""; 
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
                 const payload = {
@@ -576,7 +571,8 @@
 
             } catch (error) {
                 console.error("Error fetching AI info:", error);
-                aiContainer.innerHTML = '<h4 class="font-bold text-lg text-purple-800 mb-2">AI Supplemental Information</h4><p class="text-red-600 text-sm">Failed to fetch AI information. Please check your connection.</p>';
+                aiContainer.innerHTML = '<h4 class="font-bold text-lg text-purple-800 mb-2">AI Supplemental Information</h4><p class="text-red-600 text-sm">Failed to fetch AI information. Please check your connection or API key configuration.</p>';
+
             } finally {
                 aiContainer.querySelector('.loader')?.remove();
             }
@@ -642,7 +638,7 @@
                     }
                 });
             } else {
-                 noResultsMessage.classList.remove('hidden');
+                 noResultsMessage.classList.add('hidden');
             }
             resultsContainer.scrollIntoView({ behavior: 'smooth' });
         }
